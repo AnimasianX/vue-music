@@ -57,7 +57,12 @@ export default {
           : `The field ${context.field} is invalid`
 
         return message
-      }
+      },
+      validateOnBlur: true,
+      validateOnChange: true,
+      validateOnInput: false,
+      //will trigger when value changes internally through v-model directive
+      validateOnModelUpdate: true
     })
   }
 }
