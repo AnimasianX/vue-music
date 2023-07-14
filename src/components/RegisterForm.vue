@@ -82,28 +82,45 @@
       </vee-field>
       <ErrorMessage class="text-red-600" name="country" />
     </div>
-    <!-- TOS -->
-    <div class="mb-3 pl-6">
-      <vee-field
-        name="tos"
-        type="checkbox"
-        value="1"
-        class="w-4 h-4 float-left -ml-6 mt-1 rounded"
-      />
-      <ErrorMessage class="text-red-600 block" name="tos" />
-      <label class="inline-block">Accept terms of service</label>
-    </div>
-    <button
-      type="submit"
-      class="block w-full bg-purple-600 text-white py-1.5 px-3 rounded transition hover:bg-purple-700"
-      :disabled="registration_in_submission"
-    >
-      Submit
-    </button>
-  </vee-form>
+                      <!-- Favorite Genre of music-->
+                      <div class="mb-3">
+                        <label class="inline-block mb-2">Favorite Genre</label>
+                        <vee-field name="favorite_genre" :bails="false" v-slot="{ field }">
+                          <input
+                            type="text"
+                            class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+                            placeholder="Favorite Genre"
+                            v-bind="field"
+                          />
+                        </vee-field>
+                        <ErrorMessage class="text-red-600" name="favorite_genre" />
+                      </div>
+                      <!-- TOS -->
+                      <div class="mb-3 pl-6">
+                        <vee-field
+                          name="tos"
+                          type="checkbox"
+                          value="1"
+                          class="w-4 h-4 float-left -ml-6 mt-1 rounded"
+                        />
+                        <ErrorMessage class="text-red-600 block" name="tos" />
+                        <label class="inline-block">Accept terms of service</label>
+                      </div>
+                      <button
+                        type="submit"
+                        class="block w-full bg-purple-600 text-white py-1.5 px-3 rounded transition hover:bg-purple-700"
+                        :disabled="registration_in_submission"
+                      >
+                        Submit
+                      </button>
+                    </vee-form>
 </template>
 
 <script>
+//@ basically auto locks to src directory hence why we use it here.
+import { auth, usersCollection, } from '@/includes/firebase'
+import { mapWritableState } from 'pinia'
+import useUserStore from '@/stores/user';
 export default {
   name: 'RegisterForm',
   data() {
@@ -113,6 +130,7 @@ export default {
         name: 'required|min:3|max:100|alpha_spaces',
         email: 'required|min:3|max:100|email',
         age: 'required|min_value:18|max_value:100',
+        favorite_genre: 'required|min:3|max:100',
         password: 'required|min:9|max:100|excluded:password',
         confirm_password: 'passwords_mismatch:@password',
         country: 'required|country_excluded:Antarctica,',
@@ -129,16 +147,49 @@ export default {
       registration_alert_message: 'Please wait, your account is being created...'
     }
   },
+  computed: {
+    ...mapWritableState(useUserStore, ['userLoggedIn'])
+  },
   methods: {
-    register(values) {
+    async register(values) {
       this.registration_show_alert = true
       this.registration_in_submission = true
       this.registration_alert_variant = 'bg-blue-500'
       this.registration_alert_message = 'Please wait, your account is being created...'
 
+      let userCredentials = null
+      try {
+        userCredentials = await auth.createUserWithEmailAndPassword(
+          values.email, values.password,
+        );
+
+      }
+      catch (error) {
+        this.registration_in_submission = false;
+        this.registration_alert_variant = 'bg-red-600'
+        this.registration_alert_message = 'An unexpected error occurred. Please try again later...'
+        return;
+      }
+
+      try {
+        await usersCollection.add({
+          name: values.name,
+          email: values.email,
+          age: values.age,
+          country: values.country,
+          favorite_genre: values.favorite_genre,
+        })
+      } catch (error) {
+        this.registration_in_submission = false;
+        this.registration_alert_variant = 'bg-red-600'
+        this.registration_alert_message = 'An unexpected error occurred. Please try again later...'
+        return;
+      }
+
+      this.userLoggedIn = true;
       this.registration_alert_variant = 'bg-green-500'
       this.registration_alert_message = 'Success! Your account has been created!'
-      console.log(values)
+      console.log(userCredentials)
     }
   }
 }
