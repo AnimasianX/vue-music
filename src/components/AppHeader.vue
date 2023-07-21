@@ -55,6 +55,8 @@ export default {
     signOut(){
       this.userStore.signOut();
       // console.log(this.$route);
+      //using the global meta field(only in our manage page at the moment), we want to redirect to home since
+      //manage route requires authentication to access. So we dont want a user to be logged out in the manage field since it doesnt make sense.
       if(this.$route.meta.requiresAuth){
         this.$router.push({ name: "home"});
       }

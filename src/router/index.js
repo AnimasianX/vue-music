@@ -28,6 +28,7 @@ const routes = [{
       next();
     },
     meta: {
+      //Basically attaches this requiresAuth field to the page when accessed
       requiresAuth: true,
     },
   },
@@ -51,12 +52,15 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   console.log("Global Guard");
+  //if the route doesnt require authentication then just go to it
   if (!to.meta.requiresAuth) {
     next();
     return;
   }
   const userStore = useUserStore()
 
+  //if authentication is required and the user is logged in(authenticated) then go next, otherwise redirect
+  //for example in this case, if we try to type /manage into our route, it will not work and redirect to home,otherwise go to the manage page.
   if (userStore.userLoggedIn) {
     next();
   } else {
