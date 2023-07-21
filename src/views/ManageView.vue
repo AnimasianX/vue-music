@@ -178,17 +178,18 @@
 </template>
 
 <script>
-    import useUserStore from '@/stores/user'
+    // import useUserStore from '@/stores/user'
     export default {
         name: 'manage',
-        beforeRouteEnter(to, from ,next){
-            const store = useUserStore();
-            console.log("Befor Route Enter Manage ");
-            if(store.userLoggedIn){
-                next();
-            }else{
-                next({ name: "home" });
-            }
-        }
+        // beforeRouteEnter(to, from ,next){
+        //     const store = useUserStore();
+        //     console.log("Before Route Enter Manage ");
+        //     if(store.userLoggedIn){
+        //         next();
+        //     }else{
+        //         next({ name: "home" });
+        //     }
+        // }
+        
     }
 </script>

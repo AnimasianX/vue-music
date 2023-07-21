@@ -21,7 +21,7 @@
               <router-link class="px-2 text-white" :to="{ name: 'manage'}">Manage</router-link>
             </li>
             <li>
-             <a class="px-2 text-white" href="#" @click.prevent="logout">Logout</a>
+             <a class="px-2 text-white" href="#" @click.prevent="signOut">Logout</a>
             </li>
           </template>
 
@@ -42,19 +42,30 @@ export default {
     // ...mapWritableState(useModalStore,["isOpen"])
   },
   methods: {
-    ...mapActions(useUserStore,['signOut']),
+    // old implementation
+    // ...mapActions(useUserStore,['signOut']),
+        // async logout(){
+    //   try{
+    //     await this.signOut();
+    //   }catch(error){
+    //     alert("An unexpected error occurred, please try again...");
+    //   }
+    // }
+    //new Implmentation
+    signOut(){
+      this.userStore.signOut();
+      // console.log(this.$route);
+      if(this.$route.meta.requiresAuth){
+        this.$router.push({ name: "home"});
+      }
+    }
+    ,
     toggleAuthModal() {
       this.modalStore.isOpen = !this.modalStore.isOpen
       //when we have mapWritableStates imported and used like in the computed section, we can simply just use
       // this.isOpen
     },
-    async logout(){
-      try{
-        await this.signOut();
-      }catch(error){
-        alert("An unexpected error occurred, please try again...");
-      }
-    }
+
   }
 }
 </script>

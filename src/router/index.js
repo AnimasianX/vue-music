@@ -6,6 +6,7 @@ import {
 import Home from '@/views/HomeView.vue';
 import About from '@/views/AboutView.vue';
 import Manage from '@/views/ManageView.vue';
+import useUserStore from '@/stores/user';
 
 const routes = [{
   name: 'home',
@@ -25,7 +26,10 @@ const routes = [{
     beforeEnter: (to, from, next) => {
       console.log('Manage Route Guard');
       next();
-    }
+    },
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: "/manage",
@@ -47,9 +51,19 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   console.log("Global Guard");
+  if (!to.meta.requiresAuth) {
+    next();
+    return;
+  }
+  const userStore = useUserStore()
+
+  if (userStore.userLoggedIn) {
+    next();
+  } else {
+    next({ name: 'home' })
+  }
 
   // console.log(to, from);
-  next();
 });
 
 export default router
